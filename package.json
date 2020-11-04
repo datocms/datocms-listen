@@ -1,0 +1,61 @@
+{
+  "name": "datocms-listen",
+  "version": "0.1.0",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/datocms/datocms-listen.git"
+  },
+  "license": "MIT",
+  "author": "Stefano Verna <s.verna@datocms.com>",
+  "homepage": "https://github.com/datocms/datocms-listen",
+  "devDependencies": {
+    "@types/jest": "^25.1.4",
+    "@types/raf": "^3.4.0",
+    "@types/rimraf": "^3.0.0",
+    "doctoc": "^1.4.0",
+    "jest": "^25.1.0",
+    "np": "^6.2.5",
+    "p-defer": "^3.0.0",
+    "raf": "^3.4.1",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^26.4.1",
+    "typescript": "^3.8.3"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "watch": "rimraf dist && tsc --watch",
+    "prepare": "npm run test && npm run build",
+    "test": "jest --coverage",
+    "toc": "doctoc README.md"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "\\.(ts|tsx)$": "ts-jest"
+    },
+    "setupFiles": [
+      "raf/polyfill"
+    ],
+    "coverageReporters": [
+      "html",
+      "text"
+    ],
+    "roots": [
+      "src"
+    ],
+    "testRegex": "/__tests__/.*\\.(ts|tsx|js)$",
+    "setupFilesAfterEnv": [
+      "./src/setupTests.ts"
+    ]
+  },
+  "dependencies": {}
+}
