@@ -54,13 +54,11 @@ export type Options<QueryResult, QueryVariables> = {
   preview?: boolean;
   /** The name of the DatoCMS environment where to perform the query (defaults to primary environment) */
   environment?: string;
-  /** The initial data to use on the first render  */
-  initialData?: QueryResult | null;
   /** In case of network errors, the period to wait to reconnect */
   reconnectionPeriod?: number;
   /** The fetch function to use to perform the registration query */
   fetcher?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
-  /** The EventSource class to use to perform the connection to the SSE channel */
+  /** The EventSource class to use to open up the SSE connection */
   eventSourceClass?: {
     new (
       url: string,
@@ -78,7 +76,7 @@ export type Options<QueryResult, QueryVariables> = {
   /** Callback function to call on query result updates */
   onUpdate: (updateData: UpdateData<QueryResult>) => void;
   /** Callback function to call on errors */
-  onChannelError?: (updateData: ChannelErrorData) => void;
+  onChannelError?: (errorData: ChannelErrorData) => void;
 };
 
 export type UnsubscribeFn = () => void;
