@@ -16,7 +16,7 @@ Import `subscribeToQuery` from `datocms-listen` and use it inside your component
 
 ```js
 import { subscribeToQuery } from "datocms-listen";
-å
+
 const unsubscribe = await subscribeToQuery({
   query: `
     query BlogPosts($first: IntType!) {
