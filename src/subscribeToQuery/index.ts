@@ -176,6 +176,11 @@ export async function subscribeToQuery<
 
     channelUrl = registration.url;
   } catch (e) {
+    if (e.message.includes("fetch")) {
+      // probably a CORS error due to network issues, retry the connection
+      return waitAndReconnect();
+    }
+
     if (e instanceof Response500Error) {
       // retry the connection
       return waitAndReconnect();
