@@ -4,6 +4,14 @@
 
 A lightweight, TypeScript-ready package that offers utilities to work with DatoCMS [Real-time Updates API](https://www.datocms.com/docs/real-time-updates-api) inside a browser.
 
+
+<br /><br />
+<a href="https://www.datocms.com/">
+  <img src="https://www.datocms.com/images/full_logo.svg" height="60">
+</a>
+<br /><br />
+
+
 ## Installation
 
 ```
