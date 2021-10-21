@@ -41,7 +41,7 @@ function endpointFactory({
   return result;
 }
 
-export type ConnectionStatus = "connecting" | "connected" | "closed";
+export type ConnectionStatus = 'connecting' | 'connected' | 'closed';
 
 export type Options<QueryResult, QueryVariables> = {
   /** The GraphQL query to subscribe */
@@ -62,7 +62,7 @@ export type Options<QueryResult, QueryVariables> = {
   eventSourceClass?: {
     new (
       url: string,
-      eventSourceInitDict?: EventSourceInit | undefined
+      eventSourceInitDict?: EventSourceInit | undefined,
     ): EventSource;
     prototype: EventSource;
     readonly CLOSED: number;
@@ -104,7 +104,7 @@ class InvalidResponseError extends Error {
 
 export async function subscribeToQuery<
   QueryResult = any,
-  QueryVariables = Record<string, any>
+  QueryVariables = Record<string, any>,
 >(options: Options<QueryResult, QueryVariables>): Promise<UnsubscribeFn> {
   const {
     query,
@@ -123,22 +123,22 @@ export async function subscribeToQuery<
 
   const fetcher = customFetcher || window.fetch;
   const EventSourceClass = customEventSourceClass || window.EventSource;
-  const reconnectionPeriod = customReconnectionPeriod || 1000;
-  const baseUrl = customBaseUrl || "https://graphql-listen.datocms.com";
+  const reconnectionPeriod = Math.min(customReconnectionPeriod || 1000, 20000);
+  const baseUrl = customBaseUrl || 'https://graphql-listen.datocms.com';
 
   const waitAndReconnect = async () => {
     await new Promise((resolve) => setTimeout(resolve, reconnectionPeriod));
     return subscribeToQuery({
       ...options,
       reconnectionPeriod:
-        (options.reconnectionPeriod || 1000) + reconnectionPeriod,
+        reconnectionPeriod * (1.0 + (Math.random() * 0.2 - 0.1)),
     });
   };
 
   let channelUrl: string;
 
   if (onStatusChange) {
-    onStatusChange("connecting");
+    onStatusChange('connecting');
   }
 
   try {
@@ -149,26 +149,26 @@ export async function subscribeToQuery<
           Authorization: `Bearer ${token}`,
           Accept: `application/json`,
         },
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({ query, variables }),
-      }
+      },
     );
 
     if (req.status >= 300 && req.status < 500) {
       throw new Response400Error(
-        `Invalid status code: ${req.status} ${req.statusText}`
+        `Invalid status code: ${req.status} ${req.statusText}`,
       );
     }
 
     if (req.status >= 500) {
       throw new Response500Error(
-        `Invalid status code: ${req.status} ${req.statusText}`
+        `Invalid status code: ${req.status} ${req.statusText}`,
       );
     }
 
-    if (req.headers.get("Content-Type") !== "application/json") {
+    if (req.headers.get('Content-Type') !== 'application/json') {
       throw new InvalidResponseError(
-        `Invalid content type: ${req.headers.get("Content-Type")}`
+        `Invalid content type: ${req.headers.get('Content-Type')}`,
       );
     }
 
@@ -194,26 +194,26 @@ export async function subscribeToQuery<
       }
     };
 
-    eventSource.addEventListener("open", () => {
+    eventSource.addEventListener('open', () => {
       if (onStatusChange) {
-        onStatusChange("connected");
+        onStatusChange('connected');
       }
       resolve(unsubscribe);
     });
 
-    eventSource.addEventListener("update", (event) => {
-      const updateData = JSON.parse((event as any).data) as UpdateData<
-        QueryResult
-      >;
+    eventSource.addEventListener('update', (event) => {
+      const updateData = JSON.parse(
+        (event as any).data,
+      ) as UpdateData<QueryResult>;
       onUpdate(updateData);
     });
 
-    eventSource.addEventListener("channelError", (event) => {
+    eventSource.addEventListener('channelError', (event) => {
       const errorData = JSON.parse((event as any).data) as ChannelErrorData;
 
       if (errorData.fatal) {
         if (onStatusChange) {
-          onStatusChange("closed");
+          onStatusChange('closed');
         }
         stopReconnecting = true;
         unsubscribe();
