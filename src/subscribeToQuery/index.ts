@@ -180,17 +180,8 @@ export async function subscribeToQuery<
       throw e;
     }
 
-    if (e instanceof Response500Error) {
-      // retry the connection
-      return waitAndReconnect();
-    }
-
-    if (e.message.includes("fetch")) {
-      // probably a CORS error due to network issues, retry the connection
-      return waitAndReconnect();
-    }
-
-    throw e;
+    console.info('Failed to get a channelUrl, retrying...', e);
+    return waitAndReconnect();
   }
 
   return new Promise((resolve) => {
