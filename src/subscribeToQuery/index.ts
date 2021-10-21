@@ -131,7 +131,7 @@ export async function subscribeToQuery<
     return subscribeToQuery({
       ...options,
       reconnectionPeriod:
-        reconnectionPeriod * (1.0 + (Math.random() * 0.2 - 0.1)),
+        reconnectionPeriod * 2.0 * (1.0 + (Math.random() * 0.2 - 0.1)),
     });
   };
 
