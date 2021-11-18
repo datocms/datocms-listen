@@ -43,6 +43,11 @@ function endpointFactory({
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'closed';
 
+export type ErrorData = {
+  /** The error message returned by the EventSource **/
+  message: string;
+};
+
 export type Options<QueryResult, QueryVariables> = {
   /** The GraphQL query to subscribe */
   query: string;
@@ -75,8 +80,10 @@ export type Options<QueryResult, QueryVariables> = {
   onStatusChange?: (status: ConnectionStatus) => void;
   /** Callback function to call on query result updates */
   onUpdate: (updateData: UpdateData<QueryResult>) => void;
-  /** Callback function to call on errors */
+  /** Callback function to call on channel errors */
   onChannelError?: (errorData: ChannelErrorData) => void;
+  /** Callback function to call on other errors */
+  onError?: (errorData: ErrorData) => void;
 };
 
 export type UnsubscribeFn = () => void;
@@ -117,6 +124,7 @@ export async function subscribeToQuery<
     onStatusChange,
     onUpdate,
     onChannelError,
+    onError,
     reconnectionPeriod: customReconnectionPeriod,
     baseUrl: customBaseUrl,
   } = options;
@@ -180,7 +188,10 @@ export async function subscribeToQuery<
       throw e;
     }
 
-    console.info('Failed to get a channelUrl, retrying...', e);
+    if (onError) {
+      onError(e)
+    }
+
     return waitAndReconnect();
   }
 
@@ -224,12 +235,16 @@ export async function subscribeToQuery<
       }
     });
 
-    eventSource.onerror = async () => {
+    eventSource.addEventListener('onerror', (event) => {
       eventSource.close();
+
+      if (onError) {
+        onError(event)
+      }
 
       if (!stopReconnecting) {
         waitAndReconnect();
       }
-    };
+    });
   });
 }

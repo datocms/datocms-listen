@@ -1,4 +1,4 @@
-import { ChannelErrorData, Options, subscribeToQuery } from "../index";
+import { ChannelErrorData, ErrorData, Options, subscribeToQuery } from "../index";
 import pDefer from "p-defer";
 
 type FakeFetchOptions = {
@@ -171,5 +171,40 @@ describe("subscribeToQuery", () => {
 
     const data = await onUpdateEventDefer.promise;
     expect(data).toEqual(true);
+  });
+
+  it("notifies errors", async () => {
+    const fetcher = makeFakeFetch({serverErrors: 0});
+    const onErrorDefer = pDefer<ErrorData>();
+
+    subscribeToQuery({
+      query: `{ allBlogPosts(first: 1) { title } }`,
+      token: `XXX`,
+      preview: true,
+      environment: "foobar",
+      reconnectionPeriod: 10,
+      fetcher,
+      eventSourceClass: MockEventSource,
+      onUpdate: (data) => {},
+      onError: (error) => {
+        onErrorDefer.resolve(error);
+      },
+    });
+
+    setTimeout(() => {
+      if (streams[0].listeners["open"]) {
+        streams[0].listeners["open"].forEach((cb) => cb(true));
+      }
+    }, 100);
+
+    setTimeout(() => {
+      const error = {
+        message: "Not Found"
+      };
+      streams[0].listeners["onerror"].forEach((cb) => cb(error));
+    }, 200);
+
+    const error = await onErrorDefer.promise;
+    expect(error.error.message).toEqual("Not Found");
   });
 });
