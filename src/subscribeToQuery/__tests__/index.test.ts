@@ -1,11 +1,16 @@
 import { ChannelErrorData, Options, subscribeToQuery } from "../index";
 import pDefer from "p-defer";
 
-const makeFakeFetch = () => {
+type FakeFetchOptions = {
+  /** The number of 500 errors to generate, default: 1 **/
+  serverErrors?: number;
+};
+
+const makeFakeFetch = ({serverErrors = 1}: FakeFetchOptions = {}) => {
   let times = 0;
 
   const fetcher = async () => {
-    if (times === 0) {
+    if (times < serverErrors) {
       times += 1;
 
       return {
