@@ -48,6 +48,15 @@ export type ErrorData = {
   message: string;
 };
 
+export type EventData = {
+  /** The current status of the connection **/
+  status: ConnectionStatus;
+  /** The current channelUrl **/
+  channelUrl: string;
+  /** An event description **/
+  message: string;
+};
+
 export type Options<QueryResult, QueryVariables> = {
   /** The GraphQL query to subscribe */
   query: string;
@@ -84,6 +93,8 @@ export type Options<QueryResult, QueryVariables> = {
   onChannelError?: (errorData: ChannelErrorData) => void;
   /** Callback function to call on other errors */
   onError?: (errorData: ErrorData) => void;
+  /** Callback function to call on events during the connection lifecycle */
+  onEvent?: (eventData: EventData) => void;
 };
 
 export type UnsubscribeFn = () => void;
@@ -125,6 +136,7 @@ export async function subscribeToQuery<
     onUpdate,
     onChannelError,
     onError,
+    onEvent,
     reconnectionPeriod: customReconnectionPeriod,
     baseUrl: customBaseUrl,
   } = options;
@@ -183,6 +195,9 @@ export async function subscribeToQuery<
     const registration = await req.json();
 
     channelUrl = registration.url;
+    if (onEvent) {
+      onEvent({status: 'connecting', channelUrl, message: 'Received channel URL'});
+    }
   } catch (e) {
     if (e instanceof Response400Error || e instanceof InvalidResponseError) {
       throw e;

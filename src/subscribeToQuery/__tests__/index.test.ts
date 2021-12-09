@@ -1,4 +1,4 @@
-import { ChannelErrorData, ErrorData, Options, subscribeToQuery } from "../index";
+import { ChannelErrorData, ErrorData, EventData, Options, subscribeToQuery } from "../index";
 import pDefer from "p-defer";
 
 type FakeFetchOptions = {
@@ -171,6 +171,28 @@ describe("subscribeToQuery", () => {
 
     const data = await onUpdateEventDefer.promise;
     expect(data).toEqual(true);
+  });
+
+  it("notifies events", async () => {
+    const fetcher = makeFakeFetch();
+    const onEventDefer = pDefer<EventData>();
+
+    subscribeToQuery({
+      query: `{ allBlogPosts(first: 1) { title } }`,
+      token: `XXX`,
+      preview: true,
+      environment: "foobar",
+      reconnectionPeriod: 10,
+      fetcher,
+      eventSourceClass: MockEventSource,
+      onUpdate: (data) => {},
+      onEvent: (event) => {
+        onEventDefer.resolve(event);
+      },
+    });
+
+    const event = await onEventDefer.promise;
+    expect(event.channelUrl).toEqual("bar");
   });
 
   it("notifies errors", async () => {
