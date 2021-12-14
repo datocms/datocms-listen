@@ -199,10 +199,6 @@ export async function subscribeToQuery<
       onEvent({status: 'connecting', channelUrl, message: 'Received channel URL'});
     }
   } catch (e) {
-    if (e instanceof Response400Error || e instanceof InvalidResponseError) {
-      throw e;
-    }
-
     if (onError) {
       onError(e)
     }
