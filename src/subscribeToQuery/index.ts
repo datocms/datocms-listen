@@ -207,6 +207,10 @@ export async function subscribeToQuery<
       onError(e)
     }
 
+    if (onStatusChange) {
+      onStatusChange('closed');
+    }
+
     return waitAndReconnect();
   }
 
@@ -252,6 +256,10 @@ export async function subscribeToQuery<
 
     eventSource.addEventListener('onerror', (event) => {
       eventSource.close();
+
+      if (onStatusChange) {
+        onStatusChange('closed');
+      }
 
       if (onError) {
         onError(event)
