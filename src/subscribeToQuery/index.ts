@@ -242,15 +242,21 @@ export async function subscribeToQuery<
       const errorData = JSON.parse((event as any).data) as ChannelErrorData;
 
       if (errorData.fatal) {
-        if (onStatusChange) {
-          onStatusChange('closed');
-        }
         stopReconnecting = true;
-        unsubscribe();
       }
 
       if (onChannelError) {
         onChannelError(errorData);
+      }
+
+      eventSource.close();
+
+      if (onStatusChange) {
+        onStatusChange('closed');
+      }
+
+      if (!stopReconnecting) {
+        waitAndReconnect();
       }
     });
 
