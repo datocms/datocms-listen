@@ -1,4 +1,4 @@
-import { ChannelErrorData, ErrorData, EventData, Options, subscribeToQuery } from "../index";
+import { ChannelErrorData, EventData, Options, subscribeToQuery } from "../index";
 import pDefer from "p-defer";
 
 type FakeFetchOptions = {
@@ -197,7 +197,7 @@ describe("subscribeToQuery", () => {
 
   it("notifies errors", async () => {
     const fetcher = makeFakeFetch({serverErrors: 0});
-    const onErrorDefer = pDefer<ErrorData>();
+    const onErrorDefer = pDefer<ErrorEvent>();
 
     subscribeToQuery({
       query: `{ allBlogPosts(first: 1) { title } }`,
@@ -227,6 +227,6 @@ describe("subscribeToQuery", () => {
     }, 200);
 
     const error = await onErrorDefer.promise;
-    expect(error.error.message).toEqual("Not Found");
+    expect(error.message).toEqual("Not Found");
   });
 });

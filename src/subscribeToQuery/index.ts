@@ -43,11 +43,6 @@ function endpointFactory({
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'closed';
 
-export type ErrorData = {
-  /** The error message returned by the EventSource **/
-  message: string;
-};
-
 export type EventData = {
   /** The current status of the connection **/
   status: ConnectionStatus;
@@ -92,7 +87,7 @@ export type Options<QueryResult, QueryVariables> = {
   /** Callback function to call on channel errors */
   onChannelError?: (errorData: ChannelErrorData) => void;
   /** Callback function to call on other errors */
-  onError?: (errorData: ErrorData) => void;
+  onError?: (errorData: ErrorEvent) => void;
   /** Callback function to call on events during the connection lifecycle */
   onEvent?: (eventData: EventData) => void;
 };
@@ -204,7 +199,8 @@ export async function subscribeToQuery<
     }
 
     if (onError) {
-      onError(e)
+      const event = new ErrorEvent('FetchError', {message: e.message});
+      onError(event)
     }
 
     if (onStatusChange) {
@@ -268,7 +264,7 @@ export async function subscribeToQuery<
       }
 
       if (onError) {
-        onError(event)
+        onError(event as ErrorEvent);
       }
 
       if (!stopReconnecting) {
