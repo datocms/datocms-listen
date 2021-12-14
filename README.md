@@ -62,6 +62,21 @@ const unsubscribe = await subscribeToQuery({
     // }
     console.error(error);
   },
+  onError: (error) => {
+    // error will be
+    // {
+    //   message: "ERROR MESSAGE"
+    // }
+    console.log(error.message);
+  },
+  onEvent: (event) => {
+    // event will be
+    // {
+    //   status: "connected|connected|closed",
+    //   channelUrl: "...",
+    //   message: "MESSAGE",
+    // }
+  },
 });
 ```
 
@@ -74,6 +89,8 @@ const unsubscribe = await subscribeToQuery({
 | onUpdate           | function                                                                                  | :white_check_mark: | Callback function to receive query update events                   |                                      |
 | onChannelError     | function                                                                                  | :x:                | Callback function to receive channelError events                   |                                      |
 | onStatusChange     | function                                                                                  | :x:                | Callback function to receive status change events                  |                                      |
+| onError            | function                                                                                  | :x:                | Callback function to receive error events                          |                                      |
+| onEvent            | function                                                                                  | :x:                | Callback function to receive other events                          |                                      |
 | variables          | Object                                                                                    | :x:                | GraphQL variables for the query                                    |                                      |
 | preview            | boolean                                                                                   | :x:                | If true, the Content Delivery API with draft content will be used  | false                                |
 | environment        | string                                                                                    | :x:                | The name of the DatoCMS environment where to perform the query     | defaults to primary environment      |
@@ -109,6 +126,28 @@ The `errorData` argument has the following properties:
 | code     | string | The code of the error (ie. `INVALID_QUERY`)             |
 | message  | string | An human friendly message explaining the error          |
 | response | Object | The raw response returned by the endpoint, if available |
+
+### `onError(error: ErrorData)`
+
+This function is called when connection errors occur.
+
+The `error` argument has the following properties:
+
+| prop     | type   | description                                             |
+| -------- | ------ | ------------------------------------------------------- |
+| message  | string | An human friendly message explaining the error          |
+
+### `onEvent(event: EventData)`
+
+This function is called then other events occur.
+
+The `event` argument has the following properties:
+
+| prop       | type   | description                                             |
+| ---------- | ------ | ------------------------------------------------------- |
+| status     | string | The current connection status (see above)               |
+| channelUrl | string | The current channel URL                                 |
+| message    | string | An human friendly message explaining the event          |
 
 ## Return value
 
