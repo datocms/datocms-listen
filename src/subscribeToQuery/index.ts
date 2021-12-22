@@ -87,7 +87,7 @@ export type Options<QueryResult, QueryVariables> = {
   /** Callback function to call on channel errors */
   onChannelError?: (errorData: ChannelErrorData) => void;
   /** Callback function to call on other errors */
-  onError?: (errorData: ErrorEvent) => void;
+  onError?: (errorData: MessageEvent) => void;
   /** Callback function to call on events during the connection lifecycle */
   onEvent?: (eventData: EventData) => void;
 };
@@ -199,7 +199,8 @@ export async function subscribeToQuery<
     }
 
     if (onError) {
-      const event = new ErrorEvent('FetchError', {message: e.message});
+      const data = JSON.stringify({message: e.message});
+      const event = new MessageEvent('FetchError', {data});
       onError(event)
     }
 
@@ -263,8 +264,9 @@ export async function subscribeToQuery<
         onStatusChange('closed');
       }
 
+      const messageEvent = (event as MessageEvent);
       if (onError) {
-        onError(event as ErrorEvent);
+        onError(messageEvent);
       }
 
       if (!stopReconnecting) {

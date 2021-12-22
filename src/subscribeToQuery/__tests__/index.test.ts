@@ -197,7 +197,7 @@ describe("subscribeToQuery", () => {
 
   it("notifies errors", async () => {
     const fetcher = makeFakeFetch({serverErrors: 0});
-    const onErrorDefer = pDefer<ErrorEvent>();
+    const onErrorDefer = pDefer<MessageEvent>();
 
     subscribeToQuery({
       query: `{ allBlogPosts(first: 1) { title } }`,
@@ -220,13 +220,16 @@ describe("subscribeToQuery", () => {
     }, 100);
 
     setTimeout(() => {
-      const error = {
+      const data = JSON.stringify({
         message: "Not Found"
-      };
+      });
+      const error = new MessageEvent('FetchError', {data});
       streams[0].listeners["onerror"].forEach((cb) => cb(error));
     }, 200);
 
     const error = await onErrorDefer.promise;
-    expect(error.message).toEqual("Not Found");
+    console.log('error:', error);
+    const data = JSON.parse(error.data);
+    expect(data.message).toEqual("Not Found");
   });
 });
