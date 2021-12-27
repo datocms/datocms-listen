@@ -43,6 +43,15 @@ function endpointFactory({
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'closed';
 
+export type EventData = {
+  /** The current status of the connection **/
+  status: ConnectionStatus;
+  /** The current channelUrl **/
+  channelUrl: string;
+  /** An event description **/
+  message: string;
+};
+
 export type Options<QueryResult, QueryVariables> = {
   /** The GraphQL query to subscribe */
   query: string;
@@ -75,8 +84,12 @@ export type Options<QueryResult, QueryVariables> = {
   onStatusChange?: (status: ConnectionStatus) => void;
   /** Callback function to call on query result updates */
   onUpdate: (updateData: UpdateData<QueryResult>) => void;
-  /** Callback function to call on errors */
+  /** Callback function to call on channel errors */
   onChannelError?: (errorData: ChannelErrorData) => void;
+  /** Callback function to call on other errors */
+  onError?: (errorData: MessageEvent) => void;
+  /** Callback function to call on events during the connection lifecycle */
+  onEvent?: (eventData: EventData) => void;
 };
 
 export type UnsubscribeFn = () => void;
@@ -117,6 +130,8 @@ export async function subscribeToQuery<
     onStatusChange,
     onUpdate,
     onChannelError,
+    onError,
+    onEvent,
     reconnectionPeriod: customReconnectionPeriod,
     baseUrl: customBaseUrl,
   } = options;
@@ -175,12 +190,24 @@ export async function subscribeToQuery<
     const registration = await req.json();
 
     channelUrl = registration.url;
+    if (onEvent) {
+      onEvent({status: 'connecting', channelUrl, message: 'Received channel URL'});
+    }
   } catch (e) {
-    if (e instanceof Response400Error || e instanceof InvalidResponseError) {
+    if (e instanceof Response400Error) {
       throw e;
     }
 
-    console.info('Failed to get a channelUrl, retrying...', e);
+    if (onError) {
+      const data = JSON.stringify({message: e.message});
+      const event = new MessageEvent('FetchError', {data});
+      onError(event)
+    }
+
+    if (onStatusChange) {
+      onStatusChange('closed');
+    }
+
     return waitAndReconnect();
   }
 
@@ -212,24 +239,39 @@ export async function subscribeToQuery<
       const errorData = JSON.parse((event as any).data) as ChannelErrorData;
 
       if (errorData.fatal) {
-        if (onStatusChange) {
-          onStatusChange('closed');
-        }
         stopReconnecting = true;
-        unsubscribe();
       }
 
       if (onChannelError) {
         onChannelError(errorData);
       }
-    });
 
-    eventSource.onerror = async () => {
       eventSource.close();
+
+      if (onStatusChange) {
+        onStatusChange('closed');
+      }
 
       if (!stopReconnecting) {
         waitAndReconnect();
       }
-    };
+    });
+
+    eventSource.addEventListener('onerror', (event) => {
+      eventSource.close();
+
+      if (onStatusChange) {
+        onStatusChange('closed');
+      }
+
+      const messageEvent = (event as MessageEvent);
+      if (onError) {
+        onError(messageEvent);
+      }
+
+      if (!stopReconnecting) {
+        waitAndReconnect();
+      }
+    });
   });
 }

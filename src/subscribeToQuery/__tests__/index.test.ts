@@ -1,11 +1,16 @@
-import { ChannelErrorData, Options, subscribeToQuery } from "../index";
+import { ChannelErrorData, EventData, Options, subscribeToQuery } from "../index";
 import pDefer from "p-defer";
 
-const makeFakeFetch = () => {
+type FakeFetchOptions = {
+  /** The number of 500 errors to generate, default: 1 **/
+  serverErrors?: number;
+};
+
+const makeFakeFetch = ({serverErrors = 1}: FakeFetchOptions = {}) => {
   let times = 0;
 
   const fetcher = async () => {
-    if (times === 0) {
+    if (times < serverErrors) {
       times += 1;
 
       return {
@@ -166,5 +171,65 @@ describe("subscribeToQuery", () => {
 
     const data = await onUpdateEventDefer.promise;
     expect(data).toEqual(true);
+  });
+
+  it("notifies events", async () => {
+    const fetcher = makeFakeFetch();
+    const onEventDefer = pDefer<EventData>();
+
+    subscribeToQuery({
+      query: `{ allBlogPosts(first: 1) { title } }`,
+      token: `XXX`,
+      preview: true,
+      environment: "foobar",
+      reconnectionPeriod: 10,
+      fetcher,
+      eventSourceClass: MockEventSource,
+      onUpdate: (data) => {},
+      onEvent: (event) => {
+        onEventDefer.resolve(event);
+      },
+    });
+
+    const event = await onEventDefer.promise;
+    expect(event.channelUrl).toEqual("bar");
+  });
+
+  it("notifies errors", async () => {
+    const fetcher = makeFakeFetch({serverErrors: 0});
+    const onErrorDefer = pDefer<MessageEvent>();
+
+    subscribeToQuery({
+      query: `{ allBlogPosts(first: 1) { title } }`,
+      token: `XXX`,
+      preview: true,
+      environment: "foobar",
+      reconnectionPeriod: 10,
+      fetcher,
+      eventSourceClass: MockEventSource,
+      onUpdate: (data) => {},
+      onError: (error) => {
+        onErrorDefer.resolve(error);
+      },
+    });
+
+    setTimeout(() => {
+      if (streams[0].listeners["open"]) {
+        streams[0].listeners["open"].forEach((cb) => cb(true));
+      }
+    }, 100);
+
+    setTimeout(() => {
+      const data = JSON.stringify({
+        message: "Not Found"
+      });
+      const error = new MessageEvent('FetchError', {data});
+      streams[0].listeners["onerror"].forEach((cb) => cb(error));
+    }, 200);
+
+    const error = await onErrorDefer.promise;
+    console.log('error:', error);
+    const data = JSON.parse(error.data);
+    expect(data.message).toEqual("Not Found");
   });
 });
