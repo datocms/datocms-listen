@@ -1,6 +1,6 @@
 {
   "name": "datocms-listen",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "files": [
