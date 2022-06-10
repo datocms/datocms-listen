@@ -17,30 +17,6 @@ export type ChannelErrorData = {
   response?: any;
 };
 
-type EndpointFactoryOptions = {
-  baseUrl: string;
-  preview?: boolean;
-  environment?: string;
-};
-
-function endpointFactory({
-  baseUrl,
-  preview,
-  environment,
-}: EndpointFactoryOptions) {
-  let result = baseUrl;
-
-  if (environment) {
-    result += `/environments/${environment}`;
-  }
-
-  if (preview) {
-    result += `/preview`;
-  }
-
-  return result;
-}
-
 export type ConnectionStatus = 'connecting' | 'connected' | 'closed';
 
 export type EventData = {
@@ -59,8 +35,15 @@ export type Options<QueryResult, QueryVariables> = {
   variables?: QueryVariables;
   /** DatoCMS API token to use */
   token: string;
-  /** If true, the Content Delivery API with draft content will be used */
+  /**
+   * If true, the Content Delivery API with draft content will be used
+   * @deprecated use includeDrafts instead
+   **/
   preview?: boolean;
+  /** If true, draft records will be returned */
+  includeDrafts?: boolean;
+  /** If true, invalid records will be filtered out */
+  excludeInvalid?: boolean;
   /** The name of the DatoCMS environment where to perform the query (defaults to primary environment) */
   environment?: string;
   /** In case of network errors, the period to wait to reconnect */
@@ -124,6 +107,8 @@ export async function subscribeToQuery<
     token,
     variables,
     preview,
+    includeDrafts,
+    excludeInvalid,
     environment,
     fetcher: customFetcher,
     eventSourceClass: customEventSourceClass,
@@ -157,17 +142,17 @@ export async function subscribeToQuery<
   }
 
   try {
-    const req = await fetcher(
-      endpointFactory({ baseUrl, preview, environment }),
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: `application/json`,
-        },
-        method: 'POST',
-        body: JSON.stringify({ query, variables }),
+    const req = await fetcher(baseUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: `application/json`,
+        ...(environment ? { 'X-Environment': environment } : {}),
+        ...(includeDrafts || preview ? { 'X-Include-Drafts': 'true' } : {}),
+        ...(excludeInvalid ? { 'X-Exclude-Invalid': 'true' } : {}),
       },
-    );
+      method: 'POST',
+      body: JSON.stringify({ query, variables }),
+    });
 
     if (req.status >= 300 && req.status < 500) {
       throw new Response400Error(
@@ -191,7 +176,11 @@ export async function subscribeToQuery<
 
     channelUrl = registration.url;
     if (onEvent) {
-      onEvent({status: 'connecting', channelUrl, message: 'Received channel URL'});
+      onEvent({
+        status: 'connecting',
+        channelUrl,
+        message: 'Received channel URL',
+      });
     }
   } catch (e) {
     if (e instanceof Response400Error) {
@@ -199,9 +188,9 @@ export async function subscribeToQuery<
     }
 
     if (onError) {
-      const data = JSON.stringify({message: e.message});
-      const event = new MessageEvent('FetchError', {data});
-      onError(event)
+      const data = JSON.stringify({ message: e.message });
+      const event = new MessageEvent('FetchError', { data });
+      onError(event);
     }
 
     if (onStatusChange) {
@@ -264,7 +253,7 @@ export async function subscribeToQuery<
         onStatusChange('closed');
       }
 
-      const messageEvent = (event as MessageEvent);
+      const messageEvent = event as MessageEvent;
       if (onError) {
         onError(messageEvent);
       }
