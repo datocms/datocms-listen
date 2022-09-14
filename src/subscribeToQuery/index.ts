@@ -206,6 +206,7 @@ export async function subscribeToQuery<
 
     const unsubscribe = () => {
       if (eventSource.readyState !== 2) {
+        stopReconnecting = true;
         eventSource.close();
       }
     };
@@ -216,6 +217,20 @@ export async function subscribeToQuery<
       }
       resolve(unsubscribe);
     });
+
+    const statusCheck = setInterval(() => {
+      if (eventSource.readyState === 2) {
+        clearInterval(statusCheck);
+
+        if (onStatusChange) {
+          onStatusChange('closed');
+        }
+
+        if (!stopReconnecting) {
+          waitAndReconnect();
+        }
+      }
+    }, 300);
 
     eventSource.addEventListener('update', (event) => {
       const updateData = JSON.parse(
@@ -236,31 +251,15 @@ export async function subscribeToQuery<
       }
 
       eventSource.close();
-
-      if (onStatusChange) {
-        onStatusChange('closed');
-      }
-
-      if (!stopReconnecting) {
-        waitAndReconnect();
-      }
     });
 
     eventSource.addEventListener('onerror', (event) => {
-      eventSource.close();
-
-      if (onStatusChange) {
-        onStatusChange('closed');
-      }
-
       const messageEvent = event as MessageEvent;
       if (onError) {
         onError(messageEvent);
       }
 
-      if (!stopReconnecting) {
-        waitAndReconnect();
-      }
+      eventSource.close();
     });
   });
 }
