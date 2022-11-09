@@ -79,6 +79,18 @@ export type Options<QueryResult, QueryVariables> = {
 
 export type UnsubscribeFn = () => void;
 
+class MessageEventMock<T> {
+  type: string;
+  data: T;
+
+  constructor(type: string, options: { data: T }) {
+    this.type = type;
+    this.data = options?.data;
+  }
+}
+
+const MessageEventClass = MessageEvent || MessageEventMock;
+
 export class Response500Error extends Error {
   response: Response;
 
@@ -199,7 +211,7 @@ export async function subscribeToQuery<
     }
   } catch (e) {
     if (onError) {
-      const event = new MessageEvent<Error>('FetchError', { data: e });
+      const event = new MessageEventClass<Error>('FetchError', { data: e });
       onError(event);
     }
 
