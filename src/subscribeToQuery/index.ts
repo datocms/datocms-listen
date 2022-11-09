@@ -89,7 +89,10 @@ class MessageEventMock<T> {
   }
 }
 
-const MessageEventClass = MessageEvent || MessageEventMock;
+const MessageEventClass: typeof MessageEvent =
+  typeof MessageEvent !== 'undefined'
+    ? MessageEvent
+    : (MessageEventMock as any);
 
 export class Response500Error extends Error {
   response: Response;
