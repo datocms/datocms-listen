@@ -26,6 +26,8 @@ export type EventData = {
   channelUrl: string;
   /** An event description **/
   message: string;
+  /** Complete HTTP response */
+  response: Response;
 };
 
 export type Options<QueryResult, QueryVariables> = {
@@ -180,6 +182,7 @@ export async function subscribeToQuery<
         status: 'connecting',
         channelUrl,
         message: 'Received channel URL',
+        response: req,
       });
     }
   } catch (e) {
