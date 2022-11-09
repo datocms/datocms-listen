@@ -79,24 +79,33 @@ export type Options<QueryResult, QueryVariables> = {
 
 export type UnsubscribeFn = () => void;
 
-class Response500Error extends Error {
-  constructor(message: string) {
+export class Response500Error extends Error {
+  response: Response;
+
+  constructor(message: string, response: Response) {
     super(message);
     Object.setPrototypeOf(this, Response500Error.prototype);
+    this.response = response;
   }
 }
 
-class Response400Error extends Error {
-  constructor(message: string) {
+export class Response400Error extends Error {
+  response: Response;
+
+  constructor(message: string, response: Response) {
     super(message);
     Object.setPrototypeOf(this, Response400Error.prototype);
+    this.response = response;
   }
 }
 
-class InvalidResponseError extends Error {
-  constructor(message: string) {
+export class InvalidResponseError extends Error {
+  response: Response;
+
+  constructor(message: string, response: Response) {
     super(message);
     Object.setPrototypeOf(this, InvalidResponseError.prototype);
+    this.response = response;
   }
 }
 
@@ -159,18 +168,21 @@ export async function subscribeToQuery<
     if (req.status >= 300 && req.status < 500) {
       throw new Response400Error(
         `Invalid status code: ${req.status} ${req.statusText}`,
+        req,
       );
     }
 
     if (req.status >= 500) {
       throw new Response500Error(
         `Invalid status code: ${req.status} ${req.statusText}`,
+        req,
       );
     }
 
     if (req.headers.get('Content-Type') !== 'application/json') {
       throw new InvalidResponseError(
         `Invalid content type: ${req.headers.get('Content-Type')}`,
+        req,
       );
     }
 
@@ -186,14 +198,13 @@ export async function subscribeToQuery<
       });
     }
   } catch (e) {
-    if (e instanceof Response400Error) {
-      throw e;
+    if (onError) {
+      const event = new MessageEvent<Error>('FetchError', { data: e });
+      onError(event);
     }
 
-    if (onError) {
-      const data = JSON.stringify({ message: e.message });
-      const event = new MessageEvent('FetchError', { data });
-      onError(event);
+    if (e instanceof Response400Error) {
+      throw e;
     }
 
     if (onStatusChange) {
