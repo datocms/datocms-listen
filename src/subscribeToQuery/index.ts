@@ -1,3 +1,40 @@
+import type * as GraphQLWeb from "@0no-co/graphql.web";
+import { print } from "@0no-co/graphql.web";
+
+/** A GraphQL `DocumentNode` with attached generics for its result data and variables.
+ *
+ * @remarks
+ * A GraphQL {@link DocumentNode} defines both the variables it accepts on request and the `data`
+ * shape it delivers on a response in the GraphQL query language.
+ *
+ * To bridge the gap to TypeScript, tools may be used to generate TypeScript types that define the shape
+ * of `data` and `variables` ahead of time. These types are then attached to GraphQL documents using this
+ * `TypedDocumentNode` type.
+ *
+ * Using a `DocumentNode` that is typed like this will cause any `urql` API to type its input `variables`
+ * and resulting `data` using the types provided.
+ *
+ * @privateRemarks
+ * For compatibility reasons this type has been copied and internalized from:
+ * https://github.com/dotansimha/graphql-typed-document-node/blob/3711b12/packages/core/src/index.ts#L3-L10
+ *
+ * @see {@link https://github.com/dotansimha/graphql-typed-document-node} for more information.
+ */
+
+export type TypedDocumentNode<
+  Result = { [key: string]: any },
+  Variables = { [key: string]: any },
+> = GraphQLWeb.DocumentNode & {
+  /** Type to support `@graphql-typed-document-node/core`
+   * @internal
+   */
+  __apiType?: (variables: Variables) => Result;
+  /** Type to support `TypedQueryDocumentNode` from `graphql`
+   * @internal
+   */
+  __ensureTypesOfVariablesAndResultMatching?: (variables: Variables) => Result;
+};
+
 export type UpdateData<QueryResult> = {
   /** The raw GraphQL response */
   response: {
@@ -17,7 +54,7 @@ export type ChannelErrorData = {
   response?: any;
 };
 
-export type ConnectionStatus = 'connecting' | 'connected' | 'closed';
+export type ConnectionStatus = "connecting" | "connected" | "closed";
 
 export type EventData = {
   /** The current status of the connection **/
@@ -31,8 +68,8 @@ export type EventData = {
 };
 
 export type Options<QueryResult, QueryVariables> = {
-  /** The GraphQL query to subscribe */
-  query: string;
+  /** The GraphQL query to subscribe, or a TypedDocumentNode */
+  query: string | TypedDocumentNode<QueryResult, QueryVariables>;
   /** GraphQL variables for the query */
   variables?: QueryVariables;
   /** DatoCMS API token to use */
@@ -90,7 +127,7 @@ class MessageEventMock<T> {
 }
 
 const MessageEventClass: typeof MessageEvent =
-  typeof MessageEvent !== 'undefined'
+  typeof MessageEvent !== "undefined"
     ? MessageEvent
     : (MessageEventMock as any);
 
@@ -150,7 +187,7 @@ export async function subscribeToQuery<
   const fetcher = customFetcher || window.fetch;
   const EventSourceClass = customEventSourceClass || window.EventSource;
   const reconnectionPeriod = Math.min(customReconnectionPeriod || 1000, 20000);
-  const baseUrl = customBaseUrl || 'https://graphql-listen.datocms.com';
+  const baseUrl = customBaseUrl || "https://graphql-listen.datocms.com";
 
   const waitAndReconnect = async () => {
     await new Promise((resolve) => setTimeout(resolve, reconnectionPeriod));
@@ -164,20 +201,22 @@ export async function subscribeToQuery<
   let channelUrl: string;
 
   if (onStatusChange) {
-    onStatusChange('connecting');
+    onStatusChange("connecting");
   }
 
   try {
+    const realQuery = typeof query === "string" ? query : print(query);
+
     const req = await fetcher(baseUrl, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: `application/json`,
-        ...(environment ? { 'X-Environment': environment } : {}),
-        ...(includeDrafts || preview ? { 'X-Include-Drafts': 'true' } : {}),
-        ...(excludeInvalid ? { 'X-Exclude-Invalid': 'true' } : {}),
+        ...(environment ? { "X-Environment": environment } : {}),
+        ...(includeDrafts || preview ? { "X-Include-Drafts": "true" } : {}),
+        ...(excludeInvalid ? { "X-Exclude-Invalid": "true" } : {}),
       },
-      method: 'POST',
-      body: JSON.stringify({ query, variables }),
+      method: "POST",
+      body: JSON.stringify({ query: realQuery, variables }),
     });
 
     if (req.status >= 300 && req.status < 500) {
@@ -194,9 +233,9 @@ export async function subscribeToQuery<
       );
     }
 
-    if (req.headers.get('Content-Type') !== 'application/json') {
+    if (req.headers.get("Content-Type") !== "application/json") {
       throw new InvalidResponseError(
-        `Invalid content type: ${req.headers.get('Content-Type')}`,
+        `Invalid content type: ${req.headers.get("Content-Type")}`,
         req,
       );
     }
@@ -206,15 +245,15 @@ export async function subscribeToQuery<
     channelUrl = registration.url;
     if (onEvent) {
       onEvent({
-        status: 'connecting',
+        status: "connecting",
         channelUrl,
-        message: 'Received channel URL',
+        message: "Received channel URL",
         response: req,
       });
     }
   } catch (e) {
     if (onError) {
-      const event = new MessageEventClass<Error>('FetchError', { data: e });
+      const event = new MessageEventClass<Error>("FetchError", { data: e });
       onError(event);
     }
 
@@ -223,7 +262,7 @@ export async function subscribeToQuery<
     }
 
     if (onStatusChange) {
-      onStatusChange('closed');
+      onStatusChange("closed");
     }
 
     return waitAndReconnect();
@@ -240,9 +279,9 @@ export async function subscribeToQuery<
       }
     };
 
-    eventSource.addEventListener('open', () => {
+    eventSource.addEventListener("open", () => {
       if (onStatusChange) {
-        onStatusChange('connected');
+        onStatusChange("connected");
       }
       resolve(unsubscribe);
     });
@@ -252,7 +291,7 @@ export async function subscribeToQuery<
         clearInterval(statusCheck);
 
         if (onStatusChange) {
-          onStatusChange('closed');
+          onStatusChange("closed");
         }
 
         if (!stopReconnecting) {
@@ -261,14 +300,14 @@ export async function subscribeToQuery<
       }
     }, 300);
 
-    eventSource.addEventListener('update', (event) => {
+    eventSource.addEventListener("update", (event) => {
       const updateData = JSON.parse(
         (event as any).data,
       ) as UpdateData<QueryResult>;
       onUpdate(updateData);
     });
 
-    eventSource.addEventListener('channelError', (event) => {
+    eventSource.addEventListener("channelError", (event) => {
       const errorData = JSON.parse((event as any).data) as ChannelErrorData;
 
       if (errorData.fatal) {
@@ -282,7 +321,7 @@ export async function subscribeToQuery<
       eventSource.close();
     });
 
-    eventSource.addEventListener('onerror', (event) => {
+    eventSource.addEventListener("onerror", (event) => {
       const messageEvent = event as MessageEvent;
       if (onError) {
         onError(messageEvent);

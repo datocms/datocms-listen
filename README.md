@@ -82,22 +82,22 @@ const unsubscribe = await subscribeToQuery({
 
 ## Initialization options
 
-| prop               | type                                                                                      | required           | description                                                        | default                              |
-| ------------------ | ----------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------ | ------------------------------------ |
-| query              | string                                                                                    | :white_check_mark: | The GraphQL query to subscribe                                     |                                      |
-| token              | string                                                                                    | :white_check_mark: | DatoCMS API token to use                                           |                                      |
-| onUpdate           | function                                                                                  | :white_check_mark: | Callback function to receive query update events                   |                                      |
-| onChannelError     | function                                                                                  | :x:                | Callback function to receive channelError events                   |                                      |
-| onStatusChange     | function                                                                                  | :x:                | Callback function to receive status change events                  |                                      |
-| onError            | function                                                                                  | :x:                | Callback function to receive error events                          |                                      |
-| onEvent            | function                                                                                  | :x:                | Callback function to receive other events                          |                                      |
-| variables          | Object                                                                                    | :x:                | GraphQL variables for the query                                    |                                      |
-| preview            | boolean                                                                                   | :x:                | If true, the Content Delivery API with draft content will be used  | false                                |
-| environment        | string                                                                                    | :x:                | The name of the DatoCMS environment where to perform the query     | defaults to primary environment      |
-| reconnectionPeriod | number                                                                                    | :x:                | In case of network errors, the period (in ms) to wait to reconnect | 1000                                 |
-| fetcher            | a [fetch-like function](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)       | :x:                | The fetch function to use to perform the registration query        | window.fetch                         |
-| eventSourceClass   | an [EventSource-like](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) class | :x:                | The EventSource class to use to open up the SSE connection         | window.EventSource                   |
-| baseUrl            | string                                                                                    | :x:                | The base URL to use to perform the query                           | `https://graphql-listen.datocms.com` |
+| prop               | type                                                                                       | required           | description                                                        | default                              |
+| ------------------ | ------------------------------------------------------------------------------------------ | ------------------ | ------------------------------------------------------------------ | ------------------------------------ |
+| query              | string \| [`TypedDocumentNode`](https://github.com/dotansimha/graphql-typed-document-node) | :white_check_mark: | The GraphQL query to subscribe                                     |                                      |
+| token              | string                                                                                     | :white_check_mark: | DatoCMS API token to use                                           |                                      |
+| onUpdate           | function                                                                                   | :white_check_mark: | Callback function to receive query update events                   |                                      |
+| onChannelError     | function                                                                                   | :x:                | Callback function to receive channelError events                   |                                      |
+| onStatusChange     | function                                                                                   | :x:                | Callback function to receive status change events                  |                                      |
+| onError            | function                                                                                   | :x:                | Callback function to receive error events                          |                                      |
+| onEvent            | function                                                                                   | :x:                | Callback function to receive other events                          |                                      |
+| variables          | Object                                                                                     | :x:                | GraphQL variables for the query                                    |                                      |
+| preview            | boolean                                                                                    | :x:                | If true, the Content Delivery API with draft content will be used  | false                                |
+| environment        | string                                                                                     | :x:                | The name of the DatoCMS environment where to perform the query     | defaults to primary environment      |
+| reconnectionPeriod | number                                                                                     | :x:                | In case of network errors, the period (in ms) to wait to reconnect | 1000                                 |
+| fetcher            | a [fetch-like function](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)        | :x:                | The fetch function to use to perform the registration query        | window.fetch                         |
+| eventSourceClass   | an [EventSource-like](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) class  | :x:                | The EventSource class to use to open up the SSE connection         | window.EventSource                   |
+| baseUrl            | string                                                                                     | :x:                | The base URL to use to perform the query                           | `https://graphql-listen.datocms.com` |
 
 ## Events
 
@@ -133,9 +133,9 @@ This function is called when connection errors occur.
 
 The `error` argument has the following properties:
 
-| prop     | type   | description                                             |
-| -------- | ------ | ------------------------------------------------------- |
-| message  | string | An human friendly message explaining the error          |
+| prop    | type   | description                                    |
+| ------- | ------ | ---------------------------------------------- |
+| message | string | An human friendly message explaining the error |
 
 ### `onEvent(event: EventData)`
 
@@ -143,11 +143,11 @@ This function is called then other events occur.
 
 The `event` argument has the following properties:
 
-| prop       | type   | description                                             |
-| ---------- | ------ | ------------------------------------------------------- |
-| status     | string | The current connection status (see above)               |
-| channelUrl | string | The current channel URL                                 |
-| message    | string | An human friendly message explaining the event          |
+| prop       | type   | description                                    |
+| ---------- | ------ | ---------------------------------------------- |
+| status     | string | The current connection status (see above)      |
+| channelUrl | string | The current channel URL                        |
+| message    | string | An human friendly message explaining the event |
 
 ## Return value
 
