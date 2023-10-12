@@ -210,7 +210,7 @@ export async function subscribeToQuery<
     const req = await fetcher(baseUrl, {
       headers: {
         Authorization: `Bearer ${token}`,
-        Accept: `application/json`,
+        Accept: "application/json",
         ...(environment ? { "X-Environment": environment } : {}),
         ...(includeDrafts || preview ? { "X-Include-Drafts": "true" } : {}),
         ...(excludeInvalid ? { "X-Exclude-Invalid": "true" } : {}),
