@@ -15,6 +15,7 @@
   "author": "Stefano Verna <s.verna@datocms.com>",
   "homepage": "https://github.com/datocms/datocms-listen",
   "devDependencies": {
+    "@biomejs/biome": "1.2.2",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@types/jest": "^26.0.0",
     "@types/raf": "^3.4.0",

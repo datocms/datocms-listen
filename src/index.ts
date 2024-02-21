@@ -1,1 +1,1 @@
-export * from './subscribeToQuery';
+export * from "./subscribeToQuery";

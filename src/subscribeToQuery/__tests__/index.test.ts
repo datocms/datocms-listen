@@ -82,8 +82,8 @@ describe("subscribeToQuery", () => {
     const fetcher = makeFakeFetch();
 
     const unsubscribePromise = subscribeToQuery({
-      query: `{ allBlogPosts(first: 1) { title } }`,
-      token: `XXX`,
+      query: "{ allBlogPosts(first: 1) { title } }",
+      token: "XXX",
       preview: true,
       environment: "foobar",
       reconnectionPeriod: 10,
@@ -93,8 +93,8 @@ describe("subscribeToQuery", () => {
     });
 
     setTimeout(() => {
-      if (streams[0].listeners["open"]) {
-        streams[0].listeners["open"].forEach((cb) => cb(true));
+      if (streams[0].listeners.open) {
+        streams[0].listeners.open.forEach((cb) => cb(true));
       }
     }, 100);
 
@@ -108,8 +108,8 @@ describe("subscribeToQuery", () => {
     const onChannelErrorDefer = pDefer<ChannelErrorData>();
 
     subscribeToQuery({
-      query: `{ allBlogPosts(first: 1) { title } }`,
-      token: `XXX`,
+      query: "{ allBlogPosts(first: 1) { title } }",
+      token: "XXX",
       preview: true,
       environment: "foobar",
       reconnectionPeriod: 10,
@@ -122,19 +122,19 @@ describe("subscribeToQuery", () => {
     });
 
     setTimeout(() => {
-      if (streams[0].listeners["open"]) {
-        streams[0].listeners["open"].forEach((cb) => cb(true));
+      if (streams[0].listeners.open) {
+        streams[0].listeners.open.forEach((cb) => cb(true));
       }
     }, 100);
 
     setTimeout(() => {
-      if (streams[0].listeners["channelError"]) {
+      if (streams[0].listeners.channelError) {
         const error = {
           data: JSON.stringify({
             fatal: true,
           }),
         };
-        streams[0].listeners["channelError"].forEach((cb) => cb(error));
+        streams[0].listeners.channelError.forEach((cb) => cb(error));
       }
     }, 200);
 
@@ -147,8 +147,8 @@ describe("subscribeToQuery", () => {
     const onUpdateEventDefer = pDefer<boolean>();
 
     subscribeToQuery({
-      query: `{ allBlogPosts(first: 1) { title } }`,
-      token: `XXX`,
+      query: "{ allBlogPosts(first: 1) { title } }",
+      token: "XXX",
       preview: true,
       environment: "foobar",
       reconnectionPeriod: 10,
@@ -160,17 +160,17 @@ describe("subscribeToQuery", () => {
     });
 
     setTimeout(() => {
-      if (streams[0].listeners["open"]) {
-        streams[0].listeners["open"].forEach((cb) => cb(true));
+      if (streams[0].listeners.open) {
+        streams[0].listeners.open.forEach((cb) => cb(true));
       }
     }, 100);
 
     setTimeout(() => {
-      if (streams[0].listeners["update"]) {
+      if (streams[0].listeners.update) {
         const error = {
           data: JSON.stringify(true),
         };
-        streams[0].listeners["update"].forEach((cb) => cb(error));
+        streams[0].listeners.update.forEach((cb) => cb(error));
       }
     }, 200);
 
@@ -235,7 +235,7 @@ describe("subscribeToQuery", () => {
 
     subscribeToQuery({
       query: HomeDocument,
-      token: `XXX`,
+      token: "XXX",
       preview: true,
       environment: "foobar",
       reconnectionPeriod: 10,
@@ -247,17 +247,17 @@ describe("subscribeToQuery", () => {
     });
 
     setTimeout(() => {
-      if (streams[0].listeners["open"]) {
-        streams[0].listeners["open"].forEach((cb) => cb(true));
+      if (streams[0].listeners.open) {
+        streams[0].listeners.open.forEach((cb) => cb(true));
       }
     }, 100);
 
     setTimeout(() => {
-      if (streams[0].listeners["update"]) {
+      if (streams[0].listeners.update) {
         const error = {
           data: JSON.stringify(true),
         };
-        streams[0].listeners["update"].forEach((cb) => cb(error));
+        streams[0].listeners.update.forEach((cb) => cb(error));
       }
     }, 200);
 
@@ -270,8 +270,8 @@ describe("subscribeToQuery", () => {
     const onEventDefer = pDefer<EventData>();
 
     subscribeToQuery({
-      query: `{ allBlogPosts(first: 1) { title } }`,
-      token: `XXX`,
+      query: "{ allBlogPosts(first: 1) { title } }",
+      token: "XXX",
       preview: true,
       environment: "foobar",
       reconnectionPeriod: 10,
@@ -292,8 +292,8 @@ describe("subscribeToQuery", () => {
     const onErrorDefer = pDefer<MessageEvent>();
 
     subscribeToQuery({
-      query: `{ allBlogPosts(first: 1) { title } }`,
-      token: `XXX`,
+      query: "{ allBlogPosts(first: 1) { title } }",
+      token: "XXX",
       preview: true,
       environment: "foobar",
       reconnectionPeriod: 10,
@@ -306,8 +306,8 @@ describe("subscribeToQuery", () => {
     });
 
     setTimeout(() => {
-      if (streams[0].listeners["open"]) {
-        streams[0].listeners["open"].forEach((cb) => cb(true));
+      if (streams[0].listeners.open) {
+        streams[0].listeners.open.forEach((cb) => cb(true));
       }
     }, 100);
 
@@ -316,7 +316,7 @@ describe("subscribeToQuery", () => {
         message: "Not Found",
       });
       const error = new MessageEvent("FetchError", { data });
-      streams[0].listeners["onerror"].forEach((cb) => cb(error));
+      streams[0].listeners.onerror.forEach((cb) => cb(error));
     }, 200);
 
     const error = await onErrorDefer.promise;
