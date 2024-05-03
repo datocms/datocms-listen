@@ -1,7 +1,8 @@
 import { subscribeToQuery } from '../src';
 
 const unsubscribe = await subscribeToQuery({
-  baseUrl: `https://graphql-listen-staging.datocms.com`,
+  baseUrl:
+    process.env.GRAPHQL_LISTEN_BASE_URL || 'https://graphql-listen.datocms.com',
   query: `
     query HomePage($limit: IntType) {
       posts: allPosts(first: $limit, orderBy:_firstPublishedAt_DESC) {
