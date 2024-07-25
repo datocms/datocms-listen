@@ -62,6 +62,7 @@
     ]
   },
   "dependencies": {
-    "@0no-co/graphql.web": "^1.0.1"
+    "@0no-co/graphql.web": "^1.0.1",
+    "@datocms/cda-client": "^0.1.7"
   }
 }

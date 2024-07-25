@@ -1,11 +1,11 @@
+import { TypedDocumentNode } from "@graphql-typed-document-node/core";
+import pDefer from "p-defer";
 import {
   ChannelErrorData,
   EventData,
   Options,
-  subscribeToQuery,
+  subscribeToQuery
 } from "../index";
-import { TypedDocumentNode } from "@graphql-typed-document-node/core";
-import pDefer from "p-defer";
 
 type FakeFetchOptions = {
   /** The number of 500 errors to generate, default: 1 **/
@@ -84,7 +84,7 @@ describe("subscribeToQuery", () => {
     const unsubscribePromise = subscribeToQuery({
       query: `{ allBlogPosts(first: 1) { title } }`,
       token: `XXX`,
-      preview: true,
+      includeDrafts: true,
       environment: "foobar",
       reconnectionPeriod: 10,
       fetcher,
@@ -110,7 +110,7 @@ describe("subscribeToQuery", () => {
     subscribeToQuery({
       query: `{ allBlogPosts(first: 1) { title } }`,
       token: `XXX`,
-      preview: true,
+      includeDrafts: true,
       environment: "foobar",
       reconnectionPeriod: 10,
       fetcher,
@@ -149,7 +149,7 @@ describe("subscribeToQuery", () => {
     subscribeToQuery({
       query: `{ allBlogPosts(first: 1) { title } }`,
       token: `XXX`,
-      preview: true,
+      includeDrafts: true,
       environment: "foobar",
       reconnectionPeriod: 10,
       fetcher,
@@ -236,7 +236,7 @@ describe("subscribeToQuery", () => {
     subscribeToQuery({
       query: HomeDocument,
       token: `XXX`,
-      preview: true,
+      includeDrafts: true,
       environment: "foobar",
       reconnectionPeriod: 10,
       fetcher,
@@ -272,7 +272,7 @@ describe("subscribeToQuery", () => {
     subscribeToQuery({
       query: `{ allBlogPosts(first: 1) { title } }`,
       token: `XXX`,
-      preview: true,
+      includeDrafts: true,
       environment: "foobar",
       reconnectionPeriod: 10,
       fetcher,
@@ -294,7 +294,7 @@ describe("subscribeToQuery", () => {
     subscribeToQuery({
       query: `{ allBlogPosts(first: 1) { title } }`,
       token: `XXX`,
-      preview: true,
+      includeDrafts: true,
       environment: "foobar",
       reconnectionPeriod: 10,
       fetcher,

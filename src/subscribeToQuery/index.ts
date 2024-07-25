@@ -1,5 +1,6 @@
 import type * as GraphQLWeb from "@0no-co/graphql.web";
 import { print } from "@0no-co/graphql.web";
+import { buildRequestHeaders, type BuildRequestHeadersOptions } from "@datocms/cda-client";
 
 /** A GraphQL `DocumentNode` with attached generics for its result data and variables.
  *
@@ -67,24 +68,11 @@ export type EventData = {
   response: Response;
 };
 
-export type Options<QueryResult, QueryVariables> = {
+export type Options<QueryResult, QueryVariables> = BuildRequestHeadersOptions & {
   /** The GraphQL query to subscribe, or a TypedDocumentNode */
   query: string | TypedDocumentNode<QueryResult, QueryVariables>;
   /** GraphQL variables for the query */
   variables?: QueryVariables;
-  /** DatoCMS API token to use */
-  token: string;
-  /**
-   * If true, the Content Delivery API with draft content will be used
-   * @deprecated use includeDrafts instead
-   **/
-  preview?: boolean;
-  /** If true, draft records will be returned */
-  includeDrafts?: boolean;
-  /** If true, invalid records will be filtered out */
-  excludeInvalid?: boolean;
-  /** The name of the DatoCMS environment where to perform the query (defaults to primary environment) */
-  environment?: string;
   /** In case of network errors, the period to wait to reconnect */
   reconnectionPeriod?: number;
   /** The fetch function to use to perform the registration query */
@@ -162,17 +150,12 @@ export class InvalidResponseError extends Error {
 }
 
 export async function subscribeToQuery<
-  QueryResult = any,
-  QueryVariables = Record<string, any>,
+  QueryResult = unknown,
+  QueryVariables = unknown,
 >(options: Options<QueryResult, QueryVariables>): Promise<UnsubscribeFn> {
   const {
     query,
-    token,
     variables,
-    preview,
-    includeDrafts,
-    excludeInvalid,
-    environment,
     fetcher: customFetcher,
     eventSourceClass: customEventSourceClass,
     onStatusChange,
@@ -182,6 +165,7 @@ export async function subscribeToQuery<
     onEvent,
     reconnectionPeriod: customReconnectionPeriod,
     baseUrl: customBaseUrl,
+    ...headerOptions
   } = options;
 
   const fetcher = customFetcher || window.fetch;
@@ -208,13 +192,7 @@ export async function subscribeToQuery<
     const realQuery = typeof query === "string" ? query : print(query);
 
     const req = await fetcher(baseUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: `application/json`,
-        ...(environment ? { "X-Environment": environment } : {}),
-        ...(includeDrafts || preview ? { "X-Include-Drafts": "true" } : {}),
-        ...(excludeInvalid ? { "X-Exclude-Invalid": "true" } : {}),
-      },
+      headers: buildRequestHeaders(headerOptions),
       method: "POST",
       body: JSON.stringify({ query: realQuery, variables }),
     });
