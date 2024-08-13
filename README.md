@@ -38,7 +38,7 @@ const unsubscribe = await subscribeToQuery({
   `,
   variables: { first: 10 },
   token: "YOUR_TOKEN",
-  preview: true,
+  includeDrafts: true,
   onUpdate: (update) => {
     // response is the GraphQL response
     console.log(update.response.data);
