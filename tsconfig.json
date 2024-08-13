@@ -1,11 +1,16 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./dist",
+    "declarationDir": "dist/types",
+    "outDir": "dist/cjs",
     "module": "commonjs",
     "noImplicitAny": true,
-    "lib": ["es2017", "es7", "es6", "dom"],
-    "outDir": "./dist",
+    "lib": [
+      "es2017",
+      "es7",
+      "es6",
+      "dom"
+    ],
     "target": "es3",
     "moduleResolution": "node",
     "jsx": "react",
@@ -15,6 +20,12 @@
     "skipLibCheck": false,
     "sourceMap": true
   },
-  "include": ["src/**/*", "test/jest-dom.d.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*",
+    "test/jest-dom.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

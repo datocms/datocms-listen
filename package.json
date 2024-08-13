@@ -2,11 +2,11 @@
   "name": "datocms-listen",
   "version": "1.0.0",
   "types": "dist/index.d.ts",
-  "main": "dist/index.js",
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist", "src"],
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "typings": "dist/types/index.d.ts",
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "git://github.com/datocms/datocms-listen.git"
@@ -30,7 +30,7 @@
     "vite": "^3.1.0"
   },
   "scripts": {
-    "build": "rimraf dist && tsc",
+    "build": "rimraf dist && tsc && tsc --project ./tsconfig.esnext.json",
     "watch": "rimraf dist && tsc --watch",
     "prepare": "npm run test && npm run build",
     "test": "jest --coverage",
@@ -38,28 +38,14 @@
     "dev": "vite"
   },
   "jest": {
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
+    "moduleFileExtensions": ["ts", "tsx", "js"],
     "transform": {
       "\\.(ts|tsx)$": "ts-jest"
     },
-    "setupFiles": [
-      "raf/polyfill"
-    ],
-    "coverageReporters": [
-      "html",
-      "text"
-    ],
-    "roots": [
-      "src"
-    ],
-    "testRegex": "/__tests__/.*\\.(ts|tsx|js)$",
-    "setupFilesAfterEnv": [
-      "./src/setupTests.ts"
-    ]
+    "setupFiles": ["raf/polyfill"],
+    "coverageReporters": ["html", "text"],
+    "roots": ["src"],
+    "testRegex": "/__tests__/.*\\.(ts|tsx|js)$"
   },
   "dependencies": {
     "@0no-co/graphql.web": "^1.0.1",
