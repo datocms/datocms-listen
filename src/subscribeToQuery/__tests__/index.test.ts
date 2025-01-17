@@ -1,11 +1,11 @@
-import { TypedDocumentNode } from "@graphql-typed-document-node/core";
-import pDefer from "p-defer";
+import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
+import pDefer from 'p-defer';
 import {
-  ChannelErrorData,
-  EventData,
-  Options,
-  subscribeToQuery
-} from "../index";
+  type ChannelErrorData,
+  type EventData,
+  type Options,
+  subscribeToQuery,
+} from '../index';
 
 type FakeFetchOptions = {
   /** The number of 500 errors to generate, default: 1 **/
@@ -21,25 +21,25 @@ const makeFakeFetch = ({ serverErrors = 1 }: FakeFetchOptions = {}) => {
 
       return {
         status: 500,
-        statusText: "Server error",
+        statusText: 'Server error',
         headers: {
-          get: () => "application/json",
+          get: () => 'application/json',
         },
-        json: async () => ({ url: "foo" }),
+        json: async () => ({ url: 'foo' }),
       };
     }
 
     return {
       status: 200,
-      statusText: "OK",
+      statusText: 'OK',
       headers: {
-        get: () => "application/json",
+        get: () => 'application/json',
       },
-      json: async () => ({ url: "bar" }),
+      json: async () => ({ url: 'bar' }),
     };
   };
 
-  return fetcher as any as Options<any, any>["fetcher"];
+  return fetcher as any as Options<any, any>['fetcher'];
 };
 
 type CallbackFn = (param: any) => void;
@@ -71,21 +71,21 @@ class MyEventSource {
 const MockEventSource = MyEventSource as any as Options<
   any,
   any
->["eventSourceClass"];
+>['eventSourceClass'];
 
-describe("subscribeToQuery", () => {
+describe('subscribeToQuery', () => {
   beforeEach(() => {
     streams = [];
   });
 
-  it("returns an unsubscribe function", async () => {
+  it('returns an unsubscribe function', async () => {
     const fetcher = makeFakeFetch();
 
     const unsubscribePromise = subscribeToQuery({
-      query: `{ allBlogPosts(first: 1) { title } }`,
-      token: `XXX`,
+      query: '{ allBlogPosts(first: 1) { title } }',
+      token: 'XXX',
       includeDrafts: true,
-      environment: "foobar",
+      environment: 'foobar',
       reconnectionPeriod: 10,
       fetcher,
       eventSourceClass: MockEventSource,
@@ -93,8 +93,8 @@ describe("subscribeToQuery", () => {
     });
 
     setTimeout(() => {
-      if (streams[0].listeners["open"]) {
-        streams[0].listeners["open"].forEach((cb) => cb(true));
+      if (streams[0].listeners.open) {
+        streams[0].listeners.open.forEach((cb) => cb(true));
       }
     }, 100);
 
@@ -103,15 +103,15 @@ describe("subscribeToQuery", () => {
     expect(unsubscribe).toBeTruthy();
   });
 
-  it("handles channelError fatal events", async () => {
+  it('handles channelError fatal events', async () => {
     const fetcher = makeFakeFetch();
     const onChannelErrorDefer = pDefer<ChannelErrorData>();
 
-    subscribeToQuery({
-      query: `{ allBlogPosts(first: 1) { title } }`,
-      token: `XXX`,
+    const unsubscribePromise = subscribeToQuery({
+      query: '{ allBlogPosts(first: 1) { title } }',
+      token: 'XXX',
       includeDrafts: true,
-      environment: "foobar",
+      environment: 'foobar',
       reconnectionPeriod: 10,
       fetcher,
       eventSourceClass: MockEventSource,
@@ -122,35 +122,37 @@ describe("subscribeToQuery", () => {
     });
 
     setTimeout(() => {
-      if (streams[0].listeners["open"]) {
-        streams[0].listeners["open"].forEach((cb) => cb(true));
+      if (streams[0].listeners.open) {
+        streams[0].listeners.open.forEach((cb) => cb(true));
       }
     }, 100);
 
     setTimeout(() => {
-      if (streams[0].listeners["channelError"]) {
+      if (streams[0].listeners.channelError) {
         const error = {
           data: JSON.stringify({
             fatal: true,
           }),
         };
-        streams[0].listeners["channelError"].forEach((cb) => cb(error));
+        streams[0].listeners.channelError.forEach((cb) => cb(error));
       }
     }, 200);
 
     const error = await onChannelErrorDefer.promise;
     expect(error.fatal).toEqual(true);
+
+    await (await unsubscribePromise)();
   });
 
-  it("handles update events", async () => {
+  it('handles update events', async () => {
     const fetcher = makeFakeFetch();
     const onUpdateEventDefer = pDefer<boolean>();
 
-    subscribeToQuery({
-      query: `{ allBlogPosts(first: 1) { title } }`,
-      token: `XXX`,
+    const unsubscribePromise = subscribeToQuery({
+      query: '{ allBlogPosts(first: 1) { title } }',
+      token: 'XXX',
       includeDrafts: true,
-      environment: "foobar",
+      environment: 'foobar',
       reconnectionPeriod: 10,
       fetcher,
       eventSourceClass: MockEventSource,
@@ -160,25 +162,27 @@ describe("subscribeToQuery", () => {
     });
 
     setTimeout(() => {
-      if (streams[0].listeners["open"]) {
-        streams[0].listeners["open"].forEach((cb) => cb(true));
+      if (streams[0].listeners.open) {
+        streams[0].listeners.open.forEach((cb) => cb(true));
       }
     }, 100);
 
     setTimeout(() => {
-      if (streams[0].listeners["update"]) {
+      if (streams[0].listeners.update) {
         const error = {
           data: JSON.stringify(true),
         };
-        streams[0].listeners["update"].forEach((cb) => cb(error));
+        streams[0].listeners.update.forEach((cb) => cb(error));
       }
     }, 200);
 
     const data = await onUpdateEventDefer.promise;
     expect(data).toEqual(true);
+
+    await (await unsubscribePromise)();
   });
 
-  it("handles TypedDocumentNode as query", async () => {
+  it('handles TypedDocumentNode as query', async () => {
     const fetcher = makeFakeFetch();
     const onUpdateEventDefer = pDefer<boolean>();
 
@@ -188,9 +192,9 @@ describe("subscribeToQuery", () => {
     type HomeQueryVariables = Exact<{ [key: string]: never }>;
 
     type HomeQuery = {
-      __typename?: "Query";
+      __typename?: 'Query';
       allArticles: Array<{
-        __typename?: "ArticleRecord";
+        __typename?: 'ArticleRecord';
         id: string;
         title: string;
         _createdAt: string;
@@ -199,30 +203,30 @@ describe("subscribeToQuery", () => {
     };
 
     const HomeDocument = {
-      kind: "Document",
+      kind: 'Document',
       definitions: [
         {
-          kind: "OperationDefinition",
-          operation: "query",
-          name: { kind: "Name", value: "Home" },
+          kind: 'OperationDefinition',
+          operation: 'query',
+          name: { kind: 'Name', value: 'Home' },
           selectionSet: {
-            kind: "SelectionSet",
+            kind: 'SelectionSet',
             selections: [
               {
-                kind: "Field",
-                name: { kind: "Name", value: "allArticles" },
+                kind: 'Field',
+                name: { kind: 'Name', value: 'allArticles' },
                 selectionSet: {
-                  kind: "SelectionSet",
+                  kind: 'SelectionSet',
                   selections: [
-                    { kind: "Field", name: { kind: "Name", value: "id" } },
-                    { kind: "Field", name: { kind: "Name", value: "title" } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'title' } },
                     {
-                      kind: "Field",
-                      name: { kind: "Name", value: "_createdAt" },
+                      kind: 'Field',
+                      name: { kind: 'Name', value: '_createdAt' },
                     },
                     {
-                      kind: "Field",
-                      name: { kind: "Name", value: "_publishedAt" },
+                      kind: 'Field',
+                      name: { kind: 'Name', value: '_publishedAt' },
                     },
                   ],
                 },
@@ -233,11 +237,11 @@ describe("subscribeToQuery", () => {
       ],
     } as unknown as TypedDocumentNode<HomeQuery, HomeQueryVariables>;
 
-    subscribeToQuery({
+    const unsubscribePromise = subscribeToQuery({
       query: HomeDocument,
-      token: `XXX`,
+      token: 'XXX',
       includeDrafts: true,
-      environment: "foobar",
+      environment: 'foobar',
       reconnectionPeriod: 10,
       fetcher,
       eventSourceClass: MockEventSource,
@@ -247,33 +251,35 @@ describe("subscribeToQuery", () => {
     });
 
     setTimeout(() => {
-      if (streams[0].listeners["open"]) {
-        streams[0].listeners["open"].forEach((cb) => cb(true));
+      if (streams[0].listeners.open) {
+        streams[0].listeners.open.forEach((cb) => cb(true));
       }
     }, 100);
 
     setTimeout(() => {
-      if (streams[0].listeners["update"]) {
+      if (streams[0].listeners.update) {
         const error = {
           data: JSON.stringify(true),
         };
-        streams[0].listeners["update"].forEach((cb) => cb(error));
+        streams[0].listeners.update.forEach((cb) => cb(error));
       }
     }, 200);
 
     const data = await onUpdateEventDefer.promise;
     expect(data).toEqual(true);
+
+    await (await unsubscribePromise)();
   });
 
-  it("notifies events", async () => {
+  it('notifies events', async () => {
     const fetcher = makeFakeFetch();
     const onEventDefer = pDefer<EventData>();
 
-    subscribeToQuery({
-      query: `{ allBlogPosts(first: 1) { title } }`,
-      token: `XXX`,
+    const unsubscribePromise = subscribeToQuery({
+      query: '{ allBlogPosts(first: 1) { title } }',
+      token: 'XXX',
       includeDrafts: true,
-      environment: "foobar",
+      environment: 'foobar',
       reconnectionPeriod: 10,
       fetcher,
       eventSourceClass: MockEventSource,
@@ -284,18 +290,18 @@ describe("subscribeToQuery", () => {
     });
 
     const event = await onEventDefer.promise;
-    expect(event.channelUrl).toEqual("bar");
+    expect(event.channelUrl).toEqual('bar');
   });
 
-  it("notifies errors", async () => {
+  it('notifies errors', async () => {
     const fetcher = makeFakeFetch({ serverErrors: 0 });
     const onErrorDefer = pDefer<MessageEvent>();
 
-    subscribeToQuery({
-      query: `{ allBlogPosts(first: 1) { title } }`,
-      token: `XXX`,
+    const unsubscribePromise = subscribeToQuery({
+      query: '{ allBlogPosts(first: 1) { title } }',
+      token: 'XXX',
       includeDrafts: true,
-      environment: "foobar",
+      environment: 'foobar',
       reconnectionPeriod: 10,
       fetcher,
       eventSourceClass: MockEventSource,
@@ -306,22 +312,24 @@ describe("subscribeToQuery", () => {
     });
 
     setTimeout(() => {
-      if (streams[0].listeners["open"]) {
-        streams[0].listeners["open"].forEach((cb) => cb(true));
+      if (streams[0].listeners.open) {
+        streams[0].listeners.open.forEach((cb) => cb(true));
       }
     }, 100);
 
     setTimeout(() => {
       const data = JSON.stringify({
-        message: "Not Found",
+        message: 'Not Found',
       });
-      const error = new MessageEvent("FetchError", { data });
-      streams[0].listeners["onerror"].forEach((cb) => cb(error));
+      const error = new MessageEvent('FetchError', { data });
+      streams[0].listeners.onerror.forEach((cb) => cb(error));
     }, 200);
 
     const error = await onErrorDefer.promise;
-    console.log("error:", error);
+    console.log('error:', error);
     const data = JSON.parse(error.data);
-    expect(data.message).toEqual("Not Found");
+    expect(data.message).toEqual('Not Found');
+
+    await (await unsubscribePromise)();
   });
 });

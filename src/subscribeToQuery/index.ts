@@ -1,6 +1,9 @@
-import type * as GraphQLWeb from "@0no-co/graphql.web";
-import { print } from "@0no-co/graphql.web";
-import { buildRequestHeaders, type BuildRequestHeadersOptions } from "@datocms/cda-client";
+import type * as GraphQLWeb from '@0no-co/graphql.web';
+import { print } from '@0no-co/graphql.web';
+import {
+  type BuildRequestHeadersOptions,
+  buildRequestHeaders,
+} from '@datocms/cda-client';
 
 /** A GraphQL `DocumentNode` with attached generics for its result data and variables.
  *
@@ -55,7 +58,7 @@ export type ChannelErrorData = {
   response?: any;
 };
 
-export type ConnectionStatus = "connecting" | "connected" | "closed";
+export type ConnectionStatus = 'connecting' | 'connected' | 'closed';
 
 export type EventData = {
   /** The current status of the connection **/
@@ -68,39 +71,40 @@ export type EventData = {
   response: Response;
 };
 
-export type Options<QueryResult, QueryVariables> = BuildRequestHeadersOptions & {
-  /** The GraphQL query to subscribe, or a TypedDocumentNode */
-  query: string | TypedDocumentNode<QueryResult, QueryVariables>;
-  /** GraphQL variables for the query */
-  variables?: QueryVariables;
-  /** In case of network errors, the period to wait to reconnect */
-  reconnectionPeriod?: number;
-  /** The fetch function to use to perform the registration query */
-  fetcher?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
-  /** The EventSource class to use to open up the SSE connection */
-  eventSourceClass?: {
-    new (
-      url: string,
-      eventSourceInitDict?: EventSourceInit | undefined,
-    ): EventSource;
-    prototype: EventSource;
-    readonly CLOSED: number;
-    readonly CONNECTING: number;
-    readonly OPEN: number;
+export type Options<QueryResult, QueryVariables> =
+  BuildRequestHeadersOptions & {
+    /** The GraphQL query to subscribe, or a TypedDocumentNode */
+    query: string | TypedDocumentNode<QueryResult, QueryVariables>;
+    /** GraphQL variables for the query */
+    variables?: QueryVariables;
+    /** In case of network errors, the period to wait to reconnect */
+    reconnectionPeriod?: number;
+    /** The fetch function to use to perform the registration query */
+    fetcher?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+    /** The EventSource class to use to open up the SSE connection */
+    eventSourceClass?: {
+      new (
+        url: string,
+        eventSourceInitDict?: EventSourceInit | undefined,
+      ): EventSource;
+      prototype: EventSource;
+      readonly CLOSED: number;
+      readonly CONNECTING: number;
+      readonly OPEN: number;
+    };
+    /** The base URL to use to perform the query (defaults to `https://graphql-listen.datocms.com`) */
+    baseUrl?: string;
+    /** Callback function to call on status change */
+    onStatusChange?: (status: ConnectionStatus) => void;
+    /** Callback function to call on query result updates */
+    onUpdate: (updateData: UpdateData<QueryResult>) => void;
+    /** Callback function to call on channel errors */
+    onChannelError?: (errorData: ChannelErrorData) => void;
+    /** Callback function to call on other errors */
+    onError?: (errorData: MessageEvent) => void;
+    /** Callback function to call on events during the connection lifecycle */
+    onEvent?: (eventData: EventData) => void;
   };
-  /** The base URL to use to perform the query (defaults to `https://graphql-listen.datocms.com`) */
-  baseUrl?: string;
-  /** Callback function to call on status change */
-  onStatusChange?: (status: ConnectionStatus) => void;
-  /** Callback function to call on query result updates */
-  onUpdate: (updateData: UpdateData<QueryResult>) => void;
-  /** Callback function to call on channel errors */
-  onChannelError?: (errorData: ChannelErrorData) => void;
-  /** Callback function to call on other errors */
-  onError?: (errorData: MessageEvent) => void;
-  /** Callback function to call on events during the connection lifecycle */
-  onEvent?: (eventData: EventData) => void;
-};
 
 export type UnsubscribeFn = () => void;
 
@@ -115,7 +119,7 @@ class MessageEventMock<T> {
 }
 
 const MessageEventClass: typeof MessageEvent =
-  typeof MessageEvent !== "undefined"
+  typeof MessageEvent !== 'undefined'
     ? MessageEvent
     : (MessageEventMock as any);
 
@@ -171,7 +175,7 @@ export async function subscribeToQuery<
   const fetcher = customFetcher || window.fetch;
   const EventSourceClass = customEventSourceClass || window.EventSource;
   const reconnectionPeriod = Math.min(customReconnectionPeriod || 1000, 20000);
-  const baseUrl = customBaseUrl || "https://graphql-listen.datocms.com";
+  const baseUrl = customBaseUrl || 'https://graphql-listen.datocms.com';
 
   const waitAndReconnect = async () => {
     await new Promise((resolve) => setTimeout(resolve, reconnectionPeriod));
@@ -185,15 +189,15 @@ export async function subscribeToQuery<
   let channelUrl: string;
 
   if (onStatusChange) {
-    onStatusChange("connecting");
+    onStatusChange('connecting');
   }
 
   try {
-    const realQuery = typeof query === "string" ? query : print(query);
+    const realQuery = typeof query === 'string' ? query : print(query);
 
     const req = await fetcher(baseUrl, {
       headers: buildRequestHeaders(headerOptions),
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({ query: realQuery, variables }),
     });
 
@@ -211,9 +215,9 @@ export async function subscribeToQuery<
       );
     }
 
-    if (req.headers.get("Content-Type") !== "application/json") {
+    if (req.headers.get('Content-Type') !== 'application/json') {
       throw new InvalidResponseError(
-        `Invalid content type: ${req.headers.get("Content-Type")}`,
+        `Invalid content type: ${req.headers.get('Content-Type')}`,
         req,
       );
     }
@@ -223,15 +227,15 @@ export async function subscribeToQuery<
     channelUrl = registration.url;
     if (onEvent) {
       onEvent({
-        status: "connecting",
+        status: 'connecting',
         channelUrl,
-        message: "Received channel URL",
+        message: 'Received channel URL',
         response: req,
       });
     }
   } catch (e) {
     if (onError) {
-      const event = new MessageEventClass<Error>("FetchError", { data: e });
+      const event = new MessageEventClass<Error>('FetchError', { data: e });
       onError(event);
     }
 
@@ -240,7 +244,7 @@ export async function subscribeToQuery<
     }
 
     if (onStatusChange) {
-      onStatusChange("closed");
+      onStatusChange('closed');
     }
 
     return waitAndReconnect();
@@ -257,9 +261,9 @@ export async function subscribeToQuery<
       }
     };
 
-    eventSource.addEventListener("open", () => {
+    eventSource.addEventListener('open', () => {
       if (onStatusChange) {
-        onStatusChange("connected");
+        onStatusChange('connected');
       }
       resolve(unsubscribe);
     });
@@ -269,7 +273,7 @@ export async function subscribeToQuery<
         clearInterval(statusCheck);
 
         if (onStatusChange) {
-          onStatusChange("closed");
+          onStatusChange('closed');
         }
 
         if (!stopReconnecting) {
@@ -278,14 +282,14 @@ export async function subscribeToQuery<
       }
     }, 300);
 
-    eventSource.addEventListener("update", (event) => {
+    eventSource.addEventListener('update', (event) => {
       const updateData = JSON.parse(
         (event as any).data,
       ) as UpdateData<QueryResult>;
       onUpdate(updateData);
     });
 
-    eventSource.addEventListener("channelError", (event) => {
+    eventSource.addEventListener('channelError', (event) => {
       const errorData = JSON.parse((event as any).data) as ChannelErrorData;
 
       if (errorData.fatal) {
@@ -299,7 +303,7 @@ export async function subscribeToQuery<
       eventSource.close();
     });
 
-    eventSource.addEventListener("onerror", (event) => {
+    eventSource.addEventListener('onerror', (event) => {
       const messageEvent = event as MessageEvent;
       if (onError) {
         onError(messageEvent);
