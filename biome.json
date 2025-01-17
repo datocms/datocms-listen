@@ -12,6 +12,15 @@
       "quoteStyle": "single"
     }
   },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "off"
+      }
+    }
+  },
   "vcs": {
     "enabled": true,
     "clientKind": "git",
