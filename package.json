@@ -1,8 +1,11 @@
 {
   "name": "datocms-listen",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "types": "dist/index.d.ts",
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "typings": "dist/types/index.d.ts",
@@ -40,13 +43,24 @@
     "format": "biome check --write --unsafe ."
   },
   "jest": {
-    "moduleFileExtensions": ["ts", "tsx", "js"],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
     "transform": {
       "\\.(ts|tsx)$": "ts-jest"
     },
-    "setupFiles": ["raf/polyfill"],
-    "coverageReporters": ["html", "text"],
-    "roots": ["src"],
+    "setupFiles": [
+      "raf/polyfill"
+    ],
+    "coverageReporters": [
+      "html",
+      "text"
+    ],
+    "roots": [
+      "src"
+    ],
     "testRegex": "/__tests__/.*\\.(ts|tsx|js)$"
   },
   "dependencies": {
