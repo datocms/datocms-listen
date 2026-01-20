@@ -107,7 +107,7 @@ const unsubscribe = await subscribeToQuery({
 
 ### `onUpdate(update: UpdateData<QueryResult>)`
 
-This function will be called everytime the channel sends an updated query result. The `updateData` argument has the following properties:
+This function will be called every time the channel sends an updated query result. The `updateData` argument has the following properties:
 
 | prop     | type   | description                  |
 | -------- | ------ | ---------------------------- |
@@ -119,7 +119,7 @@ The `status` argument represents the state of the server-sent events connection.
 
 - `connecting`: the subscription channel is trying to connect
 - `connected`: the channel is open, we're receiving live updates
-- `closed`: the channel has been permanently closed due to a fatal error (ie. an invalid query)
+- `closed`: the channel has been permanently closed due to a fatal error (i.e. an invalid query)
 
 ### `onChannelError(errorData: ChannelErrorData)`
 
@@ -127,8 +127,8 @@ The `errorData` argument has the following properties:
 
 | prop     | type    | description                                                        |
 | -------- | ------- | ------------------------------------------------------------------ |
-| code     | string  | The code of the error (ie. `INVALID_QUERY`)                        |
-| message  | string  | An human friendly message explaining the error                     |
+| code     | string  | The code of the error (i.e. `INVALID_QUERY`)                        |
+| message  | string  | A human-friendly message explaining the error                     |
 | fatal    | boolean | If true, the channel has been closed and will not reconnect        |
 | response | Object  | The raw response returned by the endpoint, if available (optional) |
 
@@ -140,7 +140,7 @@ The `error` argument is a standard [MessageEvent](https://developer.mozilla.org/
 
 ### `onEvent(event: EventData)`
 
-This function is called then other events occur.
+This function is called when other events occur.
 
 The `event` argument has the following properties:
 
@@ -148,7 +148,7 @@ The `event` argument has the following properties:
 | ---------- | -------- | ---------------------------------------------- |
 | status     | string   | The current connection status (see above)      |
 | channelUrl | string   | The current channel URL                        |
-| message    | string   | An human friendly message explaining the event |
+| message    | string   | A human-friendly message explaining the event  |
 | response   | Response | The HTTP response from the registration request |
 
 ## Return value
