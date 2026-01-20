@@ -65,18 +65,16 @@ const unsubscribe = await subscribeToQuery({
     console.error(error);
   },
   onError: (error) => {
-    // error will be
-    // {
-    //   message: "ERROR MESSAGE"
-    // }
-    console.log(error.message);
+    // error is a MessageEvent, the actual error is in error.data
+    console.log(error.data);
   },
   onEvent: (event) => {
     // event will be
     // {
-    //   status: "connected|connected|closed",
+    //   status: "connecting|connected|closed",
     //   channelUrl: "...",
     //   message: "MESSAGE",
+    //   response: Response
     // }
   },
 });
@@ -127,21 +125,18 @@ The `status` argument represents the state of the server-sent events connection.
 
 The `errorData` argument has the following properties:
 
-| prop     | type   | description                                             |
-| -------- | ------ | ------------------------------------------------------- |
-| code     | string | The code of the error (ie. `INVALID_QUERY`)             |
-| message  | string | An human friendly message explaining the error          |
-| response | Object | The raw response returned by the endpoint, if available |
+| prop     | type    | description                                                        |
+| -------- | ------- | ------------------------------------------------------------------ |
+| code     | string  | The code of the error (ie. `INVALID_QUERY`)                        |
+| message  | string  | An human friendly message explaining the error                     |
+| fatal    | boolean | If true, the channel has been closed and will not reconnect        |
+| response | Object  | The raw response returned by the endpoint, if available (optional) |
 
-### `onError(error: ErrorData)`
+### `onError(error: MessageEvent)`
 
-This function is called when connection errors occur.
+This function is called when connection errors occur (network errors, SSE errors).
 
-The `error` argument has the following properties:
-
-| prop    | type   | description                                    |
-| ------- | ------ | ---------------------------------------------- |
-| message | string | An human friendly message explaining the error |
+The `error` argument is a standard [MessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent). The actual error object is available in `error.data`.
 
 ### `onEvent(event: EventData)`
 
@@ -149,11 +144,12 @@ This function is called then other events occur.
 
 The `event` argument has the following properties:
 
-| prop       | type   | description                                    |
-| ---------- | ------ | ---------------------------------------------- |
-| status     | string | The current connection status (see above)      |
-| channelUrl | string | The current channel URL                        |
-| message    | string | An human friendly message explaining the event |
+| prop       | type     | description                                    |
+| ---------- | -------- | ---------------------------------------------- |
+| status     | string   | The current connection status (see above)      |
+| channelUrl | string   | The current channel URL                        |
+| message    | string   | An human friendly message explaining the event |
+| response   | Response | The HTTP response from the registration request |
 
 ## Return value
 
