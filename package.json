@@ -20,7 +20,7 @@
   "homepage": "https://github.com/datocms/datocms-listen",
   "devDependencies": {
     "@changesets/cli": "^3.0.1",
-    "@datocms/release-toolchain": "github:datocms/release-toolchain#v1.0.0",
+    "@datocms/release-toolchain": "github:datocms/release-toolchain#v1.1.0",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@biomejs/biome": "^1.8.3",
     "@types/jest": "^29.5.14",
