@@ -9,7 +9,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git://github.com/datocms/datocms-listen.git"
+    "url": "git+https://github.com/datocms/datocms-listen.git"
   },
   "license": "MIT",
   "author": "Stefano Verna <s.verna@datocms.com>",
@@ -24,6 +24,7 @@
     "jest": "^29.7.0",
     "np": "^10.1.0",
     "p-defer": "^3.0.0",
+    "pkg-pr-new": "^0.0.88",
     "raf": "^3.4.1",
     "rimraf": "^3.0.2",
     "ts-jest": "^29.2.5",
